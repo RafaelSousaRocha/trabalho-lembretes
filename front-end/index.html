@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caderno de Lembretes</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <main class="container">
+
+        <header class="header">
+            <div class="header-titulo">
+                <span class="selo" aria-hidden="true">✎</span>
+                <div>
+                    <h1>Caderno de Lembretes</h1>
+                    <p>Anote, encontre e organize o que não pode ser esquecido.</p>
+                </div>
+            </div>
+
+            <div class="header-acoes">
+                <button id="btnImprimir" class="btn btn-secondary" type="button">Imprimir PDF</button>
+                <button id="btnNovo" class="btn btn-primary" type="button">+ Novo lembrete</button>
+            </div>
+        </header>
+
+        <div id="erroApi" class="alerta alerta-erro hidden" role="alert">
+            <span id="erroApiTexto"></span>
+            <button id="btnTentarNovamente" class="btn btn-secondary btn-pequeno" type="button">Tentar novamente</button>
+        </div>
+
+        <section id="formulario" class="card card-form hidden">
+            <h2 id="tituloFormulario">Novo lembrete</h2>
+
+            <form id="formLembrete" novalidate>
+                <input type="hidden" id="lembreteId">
+
+                <div class="form-group">
+                    <label for="descricao">Descrição <span class="obrigatorio">*</span></label>
+                    <input type="text" id="descricao" placeholder="O que você precisa lembrar?" maxlength="500" autocomplete="off">
+                    <div class="form-rodape">
+                        <small id="erroDescricao" class="erro-campo hidden">Informe uma descrição para o lembrete.</small>
+                        <small id="contador" class="contador">0/500</small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="btnCancelar" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" id="btnSalvar" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2 class="titulo-secao">Filtros</h2>
+
+            <div class="filtro">
+                <div class="form-group campo-descricao">
+                    <label for="filtroDescricao">Descrição</label>
+                    <input type="text" id="filtroDescricao" placeholder="Pesquisar texto...">
+                </div>
+
+                <div class="form-group">
+                    <label for="filtroCadastroInicial">Cadastro — de</label>
+                    <input type="date" id="filtroCadastroInicial">
+                </div>
+
+                <div class="form-group">
+                    <label for="filtroCadastroFinal">Cadastro — até</label>
+                    <input type="date" id="filtroCadastroFinal">
+                </div>
+
+                <div class="form-group">
+                    <label for="filtroAtualizacaoInicial">Atualização — de</label>
+                    <input type="date" id="filtroAtualizacaoInicial">
+                </div>
+
+                <div class="form-group">
+                    <label for="filtroAtualizacaoFinal">Atualização — até</label>
+                    <input type="date" id="filtroAtualizacaoFinal">
+                </div>
+
+                <div class="form-group">
+                    <label for="tamanhoPagina">Registros por página</label>
+                    <select id="tamanhoPagina">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+
+            <small id="erroFiltro" class="erro-campo hidden"></small>
+
+            <div class="form-actions">
+                <button id="btnLimpar" class="btn btn-secondary" type="button">Limpar filtros</button>
+                <button id="btnFiltrar" class="btn btn-primary" type="button">Filtrar</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="table-header">
+                <h2>Lembretes</h2>
+                <span id="totalRegistros" class="total">0 registros</span>
+            </div>
+
+            <div id="carregando" class="carregando hidden" role="status">Carregando…</div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-ordem="Descricao" aria-sort="none">
+                                <button type="button" class="th-ordenar">Descrição</button>
+                            </th>
+                            <th data-ordem="DataCadastro" aria-sort="descending">
+                                <button type="button" class="th-ordenar">Cadastro</button>
+                            </th>
+                            <th data-ordem="DataAtualizacao" aria-sort="none">
+                                <button type="button" class="th-ordenar">Atualização</button>
+                            </th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaLembretes"></tbody>
+                </table>
+
+                <div id="mensagemVazia" class="empty hidden"></div>
+            </div>
+
+            <nav class="pagination" aria-label="Paginação">
+                <button id="btnPrimeira" class="btn btn-secondary" type="button" aria-label="Primeira página">«</button>
+                <button id="btnAnterior" class="btn btn-secondary" type="button">← Anterior</button>
+                <span id="paginaAtual" class="pagina-info">Página 1 de 1</span>
+                <button id="btnProximo" class="btn btn-secondary" type="button">Próxima →</button>
+                <button id="btnUltima" class="btn btn-secondary" type="button" aria-label="Última página">»</button>
+            </nav>
+        </section>
+
+    </main>
+
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
